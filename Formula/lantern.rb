@@ -9,10 +9,11 @@ class Lantern < Formula
 
   depends_on "cmake" => :build
   depends_on "gcc" => :build
-  depends_on "git" => :build
   depends_on "postgresql"
 
   def install
+    ENV["C_INCLUDE_PATH"] = "/usr/local/include"
+    ENV["CPLUS_INCLUDE_PATH"] = "/usr/local/include"
     system "cmake", "-S", ".", "-B", "build"
     system "make", "-C", "build", "install"
   end
