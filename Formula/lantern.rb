@@ -87,24 +87,35 @@ class Lantern < Formula
     libdir = `#{pg_config} --pkglibdir`
     sharedir = `#{pg_config} --sharedir`
 
-    `touch lantern_install.sh`
-    `chmod +x lantern_install.sh`
+    `touch lantern_install`
+    `chmod +x lantern_install`
 
-    `echo "#!/bin/bash" >> lantern_install.sh`
-    `echo "echo 'Moving lantern files into postgres extension folder...'" >> lantern_install.sh`
+    `echo "#!/bin/bash" >> lantern_install`
+    `echo "echo 'Moving lantern files into postgres extension folder...'" >> lantern_install`
     
     if File.file?("build/lantern.so")
       lib.install "build/lantern.so"
-      `echo "/usr/bin/install -c -m 755 #{lib}/lantern.so #{libdir.strip}/" >> lantern_install.sh`
+      `echo "/usr/bin/install -c -m 755 #{lib}/lantern.so #{libdir.strip}/" >> lantern_install`
     else
       lib.install "build/lantern.dylib"
-      `echo "/usr/bin/install -c -m 755 #{lib}/lantern.dylib #{libdir.strip}/" >> lantern_install.sh`
+      `echo "/usr/bin/install -c -m 755 #{lib}/lantern.dylib #{libdir.strip}/" >> lantern_install`
     end
 
-    `echo "/usr/bin/install -c -m 644 #{share}/* #{sharedir.strip}/extension/" >> lantern_install.sh`
-    `echo "echo 'Success.'" >> lantern_install.sh`
+    `echo "/usr/bin/install -c -m 644 #{share}/* #{sharedir.strip}/extension/" >> lantern_install`
+    `echo "echo 'Success.'" >> lantern_install`
     
-    bin.install "lantern_install.sh"
+    bin.install "lantern_install"
+  end
+  
+  def caveats
+    <<~EOS
+      Thank you for installing Lantern!
+
+      Run `lantern_install` to finish installation
+
+      After that you can enable Lantern extension from psql:
+        CREATE EXTENSION lantern;
+    EOS
   end
 
   test do
