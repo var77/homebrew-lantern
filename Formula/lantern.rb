@@ -68,7 +68,7 @@ class Lantern < Formula
 
     ENV["PG_CONFIG"] = pg_config
     
-    system "cmake -S . -B build"
+    system "cmake -DUSEARCH_NO_MARCH_NATIVE=ON -S . -B build"
     system "make -C build"
 
     share.install "build/lantern.control"
