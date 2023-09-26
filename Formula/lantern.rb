@@ -9,12 +9,6 @@ class Lantern < Formula
 
   depends_on "cmake" => :build
   depends_on "gcc" => :build
-  depends_on "postgresql@11" => :optional
-  depends_on "postgresql@12" => :optional
-  depends_on "postgresql@13" => :optional
-  depends_on "postgresql@14" => :optional
-  depends_on "postgresql@15" => :optional
-  depends_on "postgresql@16" => :optional
 
   def which(cmd)
     exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
@@ -27,7 +21,7 @@ class Lantern < Formula
     nil
   end
 
-  def postgresql
+  def self.postgresql
     # Try to get the most recent postgres version first
     if File.exist?(Formula["postgresql@16"].opt_bin)
       return Formula["postgresql@16"]
@@ -42,11 +36,18 @@ class Lantern < Formula
     elsif File.exist?(Formula["postgresql@11"].opt_bin)
       return Formula["postgresql@11"]
     else
-      raise "Could not find postgres installation "
+      return nil
     end
   end
 
+  if !postgresql
+    # Install postgres 15 if no version is found
+    depends_on "postgresql@15" => :build
+  end
+
+
   def pgconfig
+   postgresql = self.class.postgresql
    pg_config = which("pg_config")
    if pg_config != nil
       # pg_config exists in path use that
@@ -63,9 +64,6 @@ class Lantern < Formula
 
     ENV["C_INCLUDE_PATH"] = "/usr/local/include"
     ENV["CPLUS_INCLUDE_PATH"] = "/usr/local/include"
-    # Remove /bin from path as Cmake will append it
-    ENV["PGROOT"] = (`#{pg_config} --bindir`).split('/')[0...-1].join('/')
-
     ENV["PG_CONFIG"] = pg_config
     
     system "cmake -DUSEARCH_NO_MARCH_NATIVE=ON -S . -B build"
@@ -119,6 +117,7 @@ class Lantern < Formula
   end
 
   test do
+    postgresql = self.class.postgresql
     pg_ctl = postgresql.opt_bin/"pg_ctl"
     psql = postgresql.opt_bin/"psql"
     port = free_port
