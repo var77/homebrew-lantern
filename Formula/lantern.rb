@@ -1,13 +1,14 @@
 class Lantern < Formula
   desc "Is a postgres extension that provides blazingly fast vector indexes"
   homepage "https://lantern.dev"
-  url "https://github.com/var77/lantern/releases/download/v0.0.4/lantern-v0.0.4-source.tar.gz"
-  version "0.0.4"
+  url "https://github.com/var77/lantern/releases/download/v0.0.3/lantern-v0.0.3-source.tar.gz"
+  version "0.0.3"
   sha256 "3ca776f0a23ad53e1a0949c509d68019b753a1e39167840e9df82bd3c5dadabf"
 
   license "MIT"
 
   depends_on "cmake" => :build
+  depends_on "make" => :build
   depends_on "gcc" => :build
 
   def which(cmd)
@@ -109,7 +110,7 @@ class Lantern < Formula
     <<~EOS
       Thank you for installing Lantern!
 
-      Run `lantern_install` to finish installation
+      Run `lantern_install` to finish installation on #{self.class.postgresql.name}
 
       After that you can enable Lantern extension from psql:
         CREATE EXTENSION lantern;
@@ -122,9 +123,10 @@ class Lantern < Formula
     psql = postgresql.opt_bin/"psql"
     port = free_port
 
+    ENV["LC_ALL"] = "en_US.UTF-8"
+    ENV["LANG"] = "C"
     system pg_ctl, "initdb", "-D", testpath/"test"
     (testpath/"test/postgresql.conf").write <<~EOS, mode: "a+"
-
       shared_preload_libraries = 'lantern'
       port = #{port}
     EOS
